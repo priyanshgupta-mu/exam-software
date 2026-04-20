@@ -27,6 +27,8 @@ export default function CandidateTile({ session, socket, violations, onStart, on
   const mobileRef = useRef(null)
   const pcsRef = useRef({ desktop: null, mobile: null })
   const [proctoringPaused, setProctoringPaused] = useState(false)
+  // Per-source connection state so we can SEE what's happening
+  const [connState, setConnState] = useState({ desktop: 'idle', mobile: 'idle' })
 
   const pauseProctoring = () => {
     socket.emit('admin:pause_proctoring', { sessionId: session.sessionId })
@@ -40,21 +42,46 @@ export default function CandidateTile({ session, socket, violations, onStart, on
   useEffect(() => {
     if (session.status === 'ended') return
 
-    const makeConnection = (source, iceServers) => {
+    const makeConnection = (source, iceServers, remoteSocketId) => {
       const existing = pcsRef.current[source]
       if (existing) { try { existing.close() } catch {} }
 
       const pc = new RTCPeerConnection({ iceServers })
       pcsRef.current[source] = pc
+      setConnState(s => ({ ...s, [source]: 'connecting' }))
+      console.log(`[admin] ${source}: new RTCPeerConnection`, { iceServers })
 
-      pc.ontrack = (e) => {
-        const videoEl = source === 'desktop' ? desktopRef.current : mobileRef.current
-        if (videoEl && e.streams && e.streams[0]) {
-          videoEl.srcObject = e.streams[0]
+      // CRITICAL: set onicecandidate BEFORE setLocalDescription so we don't
+      // miss any candidates fired during ICE gathering.
+      pc.onicecandidate = (e) => {
+        if (e.candidate) {
+          socket.emit('webrtc:signal', {
+            sessionId: session.sessionId,
+            toRole: source,
+            toSocketId: remoteSocketId,
+            source,
+            kind: 'ice',
+            data: e.candidate,
+          })
         }
       }
 
+      pc.ontrack = (e) => {
+        console.log(`[admin] ${source}: ontrack`, e.streams?.[0]?.id)
+        const videoEl = source === 'desktop' ? desktopRef.current : mobileRef.current
+        if (videoEl && e.streams && e.streams[0]) {
+          videoEl.srcObject = e.streams[0]
+          videoEl.play().catch(() => {})
+        }
+      }
+
+      pc.oniceconnectionstatechange = () => {
+        console.log(`[admin] ${source} iceConnectionState:`, pc.iceConnectionState)
+      }
+
       pc.onconnectionstatechange = () => {
+        console.log(`[admin] ${source} connectionState:`, pc.connectionState)
+        setConnState(s => ({ ...s, [source]: pc.connectionState }))
         if (['failed', 'disconnected', 'closed'].includes(pc.connectionState)) {
           pcsRef.current[source] = null
         }
@@ -66,37 +93,30 @@ export default function CandidateTile({ session, socket, violations, onStart, on
     const onSignal = async (msg) => {
       if (msg.sessionId !== session.sessionId) return
       const source = msg.source
-      let pc = pcsRef.current[source]
 
       if (msg.kind === 'offer') {
+        console.log(`[admin] ${source}: received offer from`, msg.fromSocketId)
         const iceServers = await loadIceServers()
-        pc = makeConnection(source, iceServers)
+        const pc = makeConnection(source, iceServers, msg.fromSocketId)
         await pc.setRemoteDescription(msg.data)
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)
         socket.emit('webrtc:signal', {
           sessionId: session.sessionId,
-          toRole: source,  // desktop or mobile
+          toRole: source,
           toSocketId: msg.fromSocketId,
           source,
           kind: 'answer',
           data: answer,
         })
-        // Flush any ICE candidates we might receive next
-        pc.onicecandidate = (e) => {
-          if (e.candidate) {
-            socket.emit('webrtc:signal', {
-              sessionId: session.sessionId,
-              toRole: source,
-              toSocketId: msg.fromSocketId,
-              source,
-              kind: 'ice',
-              data: e.candidate,
-            })
+        console.log(`[admin] ${source}: sent answer`)
+      } else if (msg.kind === 'ice') {
+        const pc = pcsRef.current[source]
+        if (pc) {
+          try { await pc.addIceCandidate(msg.data) } catch (e) {
+            console.warn(`[admin] ${source}: ice add failed`, e.message)
           }
         }
-      } else if (msg.kind === 'ice' && pc) {
-        try { await pc.addIceCandidate(msg.data) } catch {}
       }
     }
 
@@ -105,9 +125,13 @@ export default function CandidateTile({ session, socket, violations, onStart, on
     // Ask for streams from whichever sources are present
     const ask = () => {
       if (session.desktopConnected) {
+        console.log('[admin] requesting desktop stream')
+        setConnState(s => ({ ...s, desktop: 'requesting' }))
         socket.emit('admin:request_stream', { sessionId: session.sessionId, source: 'desktop' })
       }
       if (session.mobilePaired) {
+        console.log('[admin] requesting mobile stream')
+        setConnState(s => ({ ...s, mobile: 'requesting' }))
         socket.emit('admin:request_stream', { sessionId: session.sessionId, source: 'mobile' })
       }
     }
@@ -116,6 +140,8 @@ export default function CandidateTile({ session, socket, violations, onStart, on
     // When the candidate (re)gets their camera, re-issue the offer
     const onStreamReady = ({ sessionId: sid, source }) => {
       if (sid !== session.sessionId) return
+      console.log(`[admin] stream:ready from ${source} — re-requesting`)
+      setConnState(s => ({ ...s, [source]: 'requesting' }))
       socket.emit('admin:request_stream', { sessionId: session.sessionId, source })
     }
     socket.on('stream:ready', onStreamReady)
@@ -150,12 +176,14 @@ export default function CandidateTile({ session, socket, violations, onStart, on
       <div className="feeds">
         <div className="feed">
           <span className="feed-label">Desktop</span>
+          <span className="feed-state">{session.desktopConnected ? connState.desktop : 'offline'}</span>
           {session.desktopConnected
             ? <video ref={desktopRef} autoPlay playsInline muted />
             : <div className="feed-placeholder">Desktop not connected</div>}
         </div>
         <div className="feed">
           <span className="feed-label">Mobile</span>
+          <span className="feed-state">{session.mobilePaired ? connState.mobile : 'offline'}</span>
           {session.mobilePaired
             ? <video ref={mobileRef} autoPlay playsInline muted />
             : <div className="feed-placeholder">Mobile not paired</div>}
