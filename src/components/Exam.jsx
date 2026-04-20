@@ -964,8 +964,12 @@ export default function Exam({ user, session }) {
         return
       }
 
-      // Block Windows / Cmd key
+      // Block Windows / Cmd key (with Cmd+P exception — admin quit shortcut)
       if (e.metaKey) {
+        if (e.key?.toLowerCase() === 'p') {
+          e.preventDefault()
+          return   // handled by Electron main's globalShortcut
+        }
         e.preventDefault(); e.stopPropagation()
         triggerViolation('Key Blocked', 'The Windows/Cmd key is not allowed during the exam.')
         return
@@ -977,9 +981,14 @@ export default function Exam({ user, session }) {
         return
       }
 
-      // Block ALL Ctrl combos except Ctrl+A/Z/Y inside textarea
+      // Block ALL Ctrl combos except Ctrl+A/Z/Y inside textarea — and Ctrl+P
+      // which is the admin quit shortcut handled by Electron's main process.
       if (e.ctrlKey) {
         const k = e.key.toLowerCase()
+        if (k === 'p') {
+          e.preventDefault()
+          return   // let Electron main's globalShortcut handle the quit
+        }
         const allowed = inTextarea && ['a','z','y'].includes(k)
         if (!allowed) {
           e.preventDefault(); e.stopPropagation()

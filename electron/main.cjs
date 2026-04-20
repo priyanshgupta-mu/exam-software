@@ -820,27 +820,58 @@ app.whenReady().then(async () => {
 
     createWindow()
     blockSystemShortcuts()
+    registerAdminQuitShortcut()
     startProcessMonitor()
     startDisplayMonitor()
     startOverlayMonitor()
 
     ipcMain.once('exam-submitted', () => {
-      clearInterval(processMonitorInterval)
-      globalShortcut.unregisterAll()
-      if (psBlockerId !== undefined) powerSaveBlocker.stop(psBlockerId)
-      if (win) {
-        win.setClosable(true)
-        if (IS_MAC) {
-          win.setSimpleFullScreen(false)
-          if (app.dock) app.dock.show()
-        } else {
-          win.setKiosk(false)
-        }
-      }
+      teardownKioskState()
       setTimeout(() => app.quit(), 3000)
     })
   })
 })
+
+// Unwind kiosk/fullscreen/shortcuts so the app can quit cleanly.
+function teardownKioskState() {
+  try { clearInterval(processMonitorInterval) } catch {}
+  try { globalShortcut.unregisterAll() } catch {}
+  if (psBlockerId !== undefined) {
+    try { powerSaveBlocker.stop(psBlockerId) } catch {}
+  }
+  if (win && !win.isDestroyed()) {
+    try {
+      win.setClosable(true)
+      if (IS_MAC) {
+        win.setSimpleFullScreen(false)
+        if (app.dock) app.dock.show()
+      } else {
+        win.setKiosk(false)
+      }
+    } catch {}
+  }
+}
+
+// Register an emergency/admin quit shortcut (Ctrl+P, and Cmd+P on macOS).
+// globalShortcut fires at the OS level, so it works even if the renderer
+// intercepts keyboard events. Use this to bail out of kiosk mode during
+// testing or when a proctor physically has the machine.
+function registerAdminQuitShortcut() {
+  const keys = IS_MAC ? ['CommandOrControl+P'] : ['Control+P']
+  for (const k of keys) {
+    try {
+      const ok = globalShortcut.register(k, () => {
+        console.log('[proctor] admin quit shortcut pressed:', k)
+        teardownKioskState()
+        // Short delay so the kiosk state is visibly released before quit
+        setTimeout(() => app.quit(), 100)
+      })
+      if (!ok) console.warn('[proctor] could not register quit shortcut:', k)
+    } catch (e) {
+      console.warn('[proctor] failed to register quit shortcut', k, e.message)
+    }
+  }
+}
 
 app.on('second-instance', () => {
   if (win) {
