@@ -17,14 +17,26 @@ const IS_WIN = process.platform === 'win32'
 
 // ── Proctoring server allowlist (loaded from proctor.config.json) ─────────
 // This is how the candidate Electron app knows which remote host to trust.
+// In dev: file at repo root. In packaged app: bundled at resources/app/proctor.config.json
+// (electron-builder copies anything matching "files" into the asar).
 let PROCTOR_SERVER_HOST = ''
-try {
-  const cfg = require(path.join(__dirname, '..', 'proctor.config.json'))
-  if (cfg && cfg.serverUrl) {
-    PROCTOR_SERVER_HOST = new URL(cfg.serverUrl).host.toLowerCase()
-  }
-} catch (e) {
-  console.warn('[proctor] proctor.config.json not found — defaulting to localhost only')
+const cfgCandidates = [
+  path.join(__dirname, '..', 'proctor.config.json'),          // dev
+  path.join(process.resourcesPath || '', 'app', 'proctor.config.json'), // packaged (unpacked)
+  path.join(process.resourcesPath || '', 'app.asar', 'proctor.config.json'), // packaged (asar)
+]
+for (const p of cfgCandidates) {
+  try {
+    const cfg = require(p)
+    if (cfg && cfg.serverUrl) {
+      PROCTOR_SERVER_HOST = new URL(cfg.serverUrl).host.toLowerCase()
+      console.log('[proctor] loaded config from:', p)
+      break
+    }
+  } catch {}
+}
+if (!PROCTOR_SERVER_HOST) {
+  console.error('[proctor] proctor.config.json NOT FOUND — network filter will block the remote server. Tried:', cfgCandidates)
 }
 console.log('[proctor] proctor server host:', PROCTOR_SERVER_HOST || '(none)')
 

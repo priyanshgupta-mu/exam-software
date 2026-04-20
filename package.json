@@ -32,7 +32,8 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "package.json"
+      "package.json",
+      "proctor.config.json"
     ],
     "win": {
       "target": [
