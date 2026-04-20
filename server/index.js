@@ -246,16 +246,22 @@ io.on('connection', (socket) => {
   })
 
   // ── WebRTC signaling relay ────────────────────────────────
-  // payload shape: { sessionId, fromRole, toRole, source, data }
+  // payload shape: { sessionId, fromRole, toRole, toSocketId?, source, kind, data }
+  // Prefer point-to-point via toSocketId when provided; only broadcast if not.
   socket.on('webrtc:signal', (msg) => {
-    const { sessionId, toRole, source } = msg || {}
+    const { sessionId, toRole, toSocketId } = msg || {}
     const session = getSession(sessionId)
     if (!session) return
 
-    // from is implicit — derive from socket.data.role
     const fromRole = socket.data.role
     const outgoing = { ...msg, fromRole, fromSocketId: socket.id }
 
+    // Point-to-point if we have an explicit socket id
+    if (typeof toSocketId === 'string' && toSocketId) {
+      io.to(toSocketId).emit('webrtc:signal', outgoing)
+      return
+    }
+    // Role-based fallback
     if (toRole === 'admin') {
       for (const id of adminSockets) io.to(id).emit('webrtc:signal', outgoing)
       return
@@ -267,10 +273,6 @@ io.on('connection', (socket) => {
     if (toRole === 'mobile' && session.mobileSocketId) {
       io.to(session.mobileSocketId).emit('webrtc:signal', outgoing)
       return
-    }
-    // If toRole is an admin socket id (point-to-point for answers), honor it
-    if (typeof msg.toSocketId === 'string') {
-      io.to(msg.toSocketId).emit('webrtc:signal', outgoing)
     }
   })
 

@@ -146,7 +146,23 @@ export default function CandidateTile({ session, socket, violations, onStart, on
     }
     socket.on('stream:ready', onStreamReady)
 
+    // Safety net: if a feed stays stuck in 'requesting' for more than 12s
+    // (e.g. we missed stream:ready, or the first poke was lost), re-poke.
+    const retryTimer = setInterval(() => {
+      for (const source of ['desktop', 'mobile']) {
+        const connected = source === 'desktop' ? session.desktopConnected : session.mobilePaired
+        if (!connected) continue
+        const pc = pcsRef.current[source]
+        const state = pc?.connectionState
+        if (!pc || state === 'new' || state === 'closed' || state === 'failed') {
+          console.log(`[admin] retry requesting ${source} (state=${state || 'none'})`)
+          socket.emit('admin:request_stream', { sessionId: session.sessionId, source })
+        }
+      }
+    }, 12_000)
+
     return () => {
+      clearInterval(retryTimer)
       socket.off('webrtc:signal', onSignal)
       socket.off('stream:ready', onStreamReady)
       for (const source of ['desktop', 'mobile']) {

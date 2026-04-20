@@ -208,13 +208,20 @@ async function openCamera(facing, previewTarget) {
 // ── WebRTC: answer admin requests ───────────────────────────
 socket.on('webrtc:request_offer', async ({ adminSocketId, source }) => {
   if (source !== 'mobile') return
-  if (!stream) return  // camera not started yet — admin will re-request on stream:ready
+  console.log('[mobile] webrtc:request_offer from admin', adminSocketId, 'stream?', !!stream)
+  if (!stream) {
+    console.log('[mobile] no stream yet — will respond on stream:ready')
+    return
+  }
+
+  // Close any previous PC for this admin (prevents orphans on retries)
+  const prev = peerConnections.get(adminSocketId)
+  if (prev) { try { prev.close() } catch {} }
 
   const pc = new RTCPeerConnection({ iceServers })
   peerConnections.set(adminSocketId, pc)
 
-  for (const track of stream.getVideoTracks()) pc.addTrack(track, stream)
-
+  // Set handlers BEFORE adding tracks / creating offer so nothing is missed
   pc.onicecandidate = (e) => {
     if (e.candidate) {
       socket.emit('webrtc:signal', {
@@ -223,14 +230,21 @@ socket.on('webrtc:request_offer', async ({ adminSocketId, source }) => {
       })
     }
   }
+  pc.oniceconnectionstatechange = () => {
+    console.log('[mobile] iceConnectionState:', pc.iceConnectionState)
+  }
   pc.onconnectionstatechange = () => {
+    console.log('[mobile] connectionState:', pc.connectionState)
     if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
       peerConnections.delete(adminSocketId)
     }
   }
 
+  for (const track of stream.getVideoTracks()) pc.addTrack(track, stream)
+
   const offer = await pc.createOffer()
   await pc.setLocalDescription(offer)
+  console.log('[mobile] sent offer to admin', adminSocketId)
   socket.emit('webrtc:signal', {
     sessionId, toRole: 'admin', toSocketId: adminSocketId,
     source: 'mobile', kind: 'offer', data: offer,
@@ -254,11 +268,20 @@ socket.on('webrtc:request_offer', async ({ adminSocketId, source }) => {
 socket.on('webrtc:signal', async (msg) => {
   if (msg.source !== 'mobile') return
   const pc = peerConnections.get(msg.fromSocketId)
-  if (!pc) return
+  if (!pc) {
+    console.warn('[mobile] signal for unknown PC:', msg.kind, msg.fromSocketId)
+    return
+  }
   try {
-    if (msg.kind === 'answer') await pc.setRemoteDescription(msg.data)
-    else if (msg.kind === 'ice') await pc.addIceCandidate(msg.data)
-  } catch {}
+    if (msg.kind === 'answer') {
+      console.log('[mobile] received answer from admin', msg.fromSocketId)
+      await pc.setRemoteDescription(msg.data)
+    } else if (msg.kind === 'ice') {
+      await pc.addIceCandidate(msg.data)
+    }
+  } catch (e) {
+    console.error('[mobile] signal handler error', e)
+  }
 })
 
 // ── Face detection (mobile-side proctoring) ─────────────────
