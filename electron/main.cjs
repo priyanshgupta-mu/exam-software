@@ -1,3 +1,12 @@
+// ── Render (headless Linux) shim ───────────────────────────────────────────
+// Render invokes this file as the start command but has no display/Electron.
+// When running on Render (RENDER env var is injected automatically),
+// hand off to the proctoring server instead of booting Electron.
+if (process.env.RENDER) {
+  require(require('path').join(__dirname, '..', 'server', 'index.js'))
+  return
+}
+
 const { app, BrowserWindow, globalShortcut, powerSaveBlocker, ipcMain, dialog, systemPreferences, screen } = require('electron')
 const { exec } = require('child_process')
 const fs   = require('fs')
