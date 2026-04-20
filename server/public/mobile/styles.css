@@ -1,46 +1,210 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; background: #0a0a0a; color: #fff;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
 
 #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px; background: #111; border-bottom: 1px solid #222;
+.screen {
+  flex: 1;
+  padding: 20px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.brand { font-weight: 700; letter-spacing: 0.02em; }
+.screen.hidden { display: none; }
+
+.brand {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #1f2937;
+  margin-bottom: 20px;
+  color: #BF991A;
+}
+
+.status-row { margin-bottom: 16px; }
 .status {
-  font-size: 12px; padding: 4px 10px; border-radius: 999px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.06em;
+  display: inline-block;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .status-pending { background: #3b2f00; color: #fbbf24; }
 .status-connected { background: #052e1a; color: #4ade80; }
 .status-error { background: #3b0a0a; color: #f87171; }
 
-#preview {
-  flex: 1; width: 100%; object-fit: cover; background: #000;
+/* Wait screen */
+.wait-body { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 20px 0; }
+.wait-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.wait-sub { font-size: 14px; color: #9ca3af; line-height: 1.5; }
+.fine { color: #6b7280; font-size: 11px; text-align: center; line-height: 1.4; padding-top: 12px; border-top: 1px dashed #1f2937; }
+
+/* Wizard shared */
+.wizard-h { font-size: 22px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+.wizard-p { font-size: 14px; color: #9ca3af; line-height: 1.55; margin-bottom: 22px; }
+
+.btn-primary {
+  width: 100%;
+  background: #BF991A;
+  color: #0a0a0a;
+  border: 0;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: auto;
+}
+.btn-primary:active { background: #a8871a; }
+.btn-primary:disabled { opacity: 0.5; }
+
+/* Handedness picker */
+.hand-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.hand-card {
+  background: #111827; border: 1px solid #1f2937; color: #fff;
+  padding: 22px 14px; border-radius: 14px; text-align: center;
+  font-family: inherit;
+}
+.hand-card:active { background: #1f2937; border-color: #BF991A; }
+.hand-emoji { font-size: 40px; margin-bottom: 8px; }
+.hand-label { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.hand-sub { font-size: 12px; color: #9ca3af; }
+.hand-sub strong { color: #BF991A; }
+
+/* Surroundings sweep */
+.sweep-video {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  background: #000;
+  object-fit: cover;
+  border: 1px solid #1f2937;
+  margin-bottom: 16px;
 }
 
+/* Phone position diagram */
+.pos-diagram {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 14px;
+  padding: 22px 16px;
+  margin-bottom: 20px;
+}
+.pos-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 12px;
+}
+.pos-icon { font-size: 44px; line-height: 1; }
+.pos-phone-line {
+  flex: 0 0 52px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #BF991A 0 6px, transparent 6px 10px);
+}
+.pos-row-sub {
+  display: flex; justify-content: space-around;
+  font-size: 12px; color: #9ca3af; font-weight: 600;
+}
+/* flip diagram when left-handed */
+.pos-diagram.left .pos-row { flex-direction: row-reverse; }
+.pos-diagram.left .pos-row-sub { flex-direction: row-reverse; }
+
+.pos-checklist {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 22px;
+  color: #d1d5db;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.pos-checklist li {
+  position: relative;
+  padding-left: 28px;
+  margin-bottom: 10px;
+}
+.pos-checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0; top: 0;
+  width: 20px; height: 20px;
+  background: #BF991A;
+  color: #0a0a0a;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Live full-screen exam view */
+#screen-live {
+  padding: 0;
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+#preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+/* Mirror the preview only when the user-facing (front) camera is active — so
+   the user sees a natural selfie view. What goes over WebRTC is unaffected. */
+#preview.mirror { transform: scaleX(-1); }
+
+.live-overlay-top {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 18px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+  z-index: 2;
+}
+.live-dot {
+  width: 10px; height: 10px; background: #ef4444; border-radius: 999px;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.live-text {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+  color: #fff;
+}
+.live-session {
+  margin-left: auto;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11px; color: #9ca3af;
+}
+
+.live-overlay-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 14px 18px 22px;
+  background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+  z-index: 2;
+}
+.live-hint {
+  font-size: 13px; color: #e5e7eb; text-align: center;
+  line-height: 1.4;
+}
+.live-hint.alert { color: #fca5a5; font-weight: 700; }
+
+/* Overlay for error / info panels */
 .overlay {
-  position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-  background: rgba(0,0,0,0.6); padding: 24px; z-index: 10;
+  position: fixed; inset: 0; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.75); padding: 24px; z-index: 100;
 }
 .overlay.show { display: flex; }
 .panel {
-  background: #161616; border: 1px solid #262626; border-radius: 14px;
-  padding: 22px 20px; max-width: 360px; text-align: center;
+  background: #161616; border: 1px solid #262626;
+  border-radius: 14px; padding: 22px 20px;
+  max-width: 360px; text-align: center;
 }
 #panel-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
 #panel-sub { color: #9ca3af; font-size: 14px; line-height: 1.5; }
-
-footer {
-  padding: 12px 16px 20px; background: #111; border-top: 1px solid #222;
-}
-.row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
-button {
-  background: #1e3a5f; color: #fff; border: 0; padding: 10px 16px;
-  border-radius: 10px; font-size: 14px; font-weight: 600;
-}
-button:active { background: #264d7e; }
-.muted { color: #9ca3af; font-size: 12px; font-family: ui-monospace, SFMono-Regular, monospace; }
-.fine { color: #6b7280; font-size: 11px; line-height: 1.4; }

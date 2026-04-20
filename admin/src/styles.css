@@ -113,6 +113,8 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-start:hover:not(:disabled) { background: #15803d; }
 .btn-stop { background: #dc2626; color: #fff; }
 .btn-stop:hover:not(:disabled) { background: #b91c1c; }
+.btn-pause { background: #BF991A; color: #0a0a0a; }
+.btn-pause:hover:not(:disabled) { background: #a8871a; }
 
 .violations {
   padding: 8px 16px;

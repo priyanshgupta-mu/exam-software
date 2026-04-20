@@ -9,27 +9,97 @@
 </head>
 <body>
   <div id="app">
-    <header>
+    <!-- STEP: connecting + waiting for exam to start -->
+    <div class="screen" id="screen-wait">
       <div class="brand">ProctorExam</div>
-      <div id="status" class="status status-pending">Connecting…</div>
-    </header>
+      <div class="status-row">
+        <div id="status" class="status status-pending">Connecting…</div>
+      </div>
+      <div class="wait-body">
+        <div class="wait-title" id="wait-title">Connecting to the exam server</div>
+        <div class="wait-sub" id="wait-sub">Hold tight. Do not close this page.</div>
+      </div>
+      <div class="fine">Keep this page open for the entire exam. Do not lock the phone.</div>
+    </div>
 
-    <video id="preview" autoplay muted playsinline></video>
-
-    <div id="overlay" class="overlay">
-      <div id="panel" class="panel">
-        <div id="panel-title">Preparing camera…</div>
-        <div id="panel-sub"></div>
+    <!-- STEP: handedness picker -->
+    <div class="screen hidden" id="screen-hand">
+      <div class="brand">ProctorExam</div>
+      <h2 class="wizard-h">Which hand do you write with?</h2>
+      <p class="wizard-p">We'll use this to tell you where to place your phone so both your face and desk are visible.</p>
+      <div class="hand-grid">
+        <button class="hand-card" data-hand="right">
+          <div class="hand-emoji">✍️</div>
+          <div class="hand-label">Right-handed</div>
+          <div class="hand-sub">Phone on your <strong>left</strong> side</div>
+        </button>
+        <button class="hand-card" data-hand="left">
+          <div class="hand-emoji" style="transform: scaleX(-1);">✍️</div>
+          <div class="hand-label">Left-handed</div>
+          <div class="hand-sub">Phone on your <strong>right</strong> side</div>
+        </button>
       </div>
     </div>
 
-    <footer>
-      <div class="row">
-        <button id="flip">Flip Camera</button>
-        <div id="session" class="muted"></div>
+    <!-- STEP: surroundings sweep -->
+    <div class="screen hidden" id="screen-sweep">
+      <div class="brand">ProctorExam</div>
+      <h2 class="wizard-h">Show your surroundings</h2>
+      <p class="wizard-p">
+        Pick up the phone and slowly pan around the room —
+        ceiling, walls, desk, under the desk, and doorway.
+        The proctor needs to confirm you're alone with nothing suspicious.
+      </p>
+      <video id="sweep-video" autoplay muted playsinline class="sweep-video"></video>
+      <button id="sweep-done" class="btn-primary">I've shown everything</button>
+    </div>
+
+    <!-- STEP: position the phone -->
+    <div class="screen hidden" id="screen-pos">
+      <div class="brand">ProctorExam</div>
+      <h2 class="wizard-h">Position your phone</h2>
+      <p class="wizard-p" id="pos-instruction">
+        <!-- filled in per handedness -->
+      </p>
+      <div class="pos-diagram">
+        <div class="pos-row">
+          <div class="pos-icon pos-laptop">💻</div>
+          <div class="pos-phone-line"></div>
+          <div class="pos-icon pos-phone" id="pos-phone-icon">📱</div>
+        </div>
+        <div class="pos-row-sub">
+          <span>You</span>
+          <span id="pos-side-label">Phone here</span>
+        </div>
       </div>
-      <div class="fine">Keep this page open for the entire exam. Do not lock the phone.</div>
-    </footer>
+      <ol class="pos-checklist">
+        <li>Prop the phone up (~45° angle) so it can see your hands <strong>and</strong> your face from the side.</li>
+        <li>Make sure nothing blocks the view — no books, no clutter in front of the phone.</li>
+        <li>Leave the phone <strong>screen-side facing you</strong>. Do not mute it or put it face-down.</li>
+      </ol>
+      <button id="pos-done" class="btn-primary">Phone is positioned</button>
+    </div>
+
+    <!-- STEP: live monitoring during the exam -->
+    <div class="screen hidden" id="screen-live">
+      <video id="preview" autoplay muted playsinline></video>
+      <div class="live-overlay-top">
+        <span class="live-dot"></span>
+        <span class="live-text">LIVE</span>
+        <span class="live-session" id="live-session"></span>
+      </div>
+      <div class="live-overlay-bottom">
+        <div class="live-hint" id="live-hint">Keep the phone steady. Do not touch it.</div>
+      </div>
+    </div>
+
+    <!-- Shared error / info overlay -->
+    <div id="overlay" class="overlay">
+      <div id="panel" class="panel">
+        <div id="panel-title">—</div>
+        <div id="panel-sub"></div>
+      </div>
+    </div>
   </div>
 
   <script src="./mobile.js"></script>

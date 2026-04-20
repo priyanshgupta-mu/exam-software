@@ -26,6 +26,16 @@ export default function CandidateTile({ session, socket, violations, onStart, on
   const desktopRef = useRef(null)
   const mobileRef = useRef(null)
   const pcsRef = useRef({ desktop: null, mobile: null })
+  const [proctoringPaused, setProctoringPaused] = useState(false)
+
+  const pauseProctoring = () => {
+    socket.emit('admin:pause_proctoring', { sessionId: session.sessionId })
+    setProctoringPaused(true)
+  }
+  const resumeProctoring = () => {
+    socket.emit('admin:resume_proctoring', { sessionId: session.sessionId })
+    setProctoringPaused(false)
+  }
 
   useEffect(() => {
     if (session.status === 'ended') return
@@ -156,7 +166,10 @@ export default function CandidateTile({ session, socket, violations, onStart, on
         <div className="violations">
           {violations.slice(0, 5).map((v, i) => (
             <div key={i} className="violation-row">
-              <span>{v.title}</span>
+              <span>
+                {v.source === 'mobile' ? '📱 ' : '💻 '}
+                {v.title}
+              </span>
               <span>{new Date(v.at).toLocaleTimeString()}</span>
             </div>
           ))}
@@ -171,6 +184,15 @@ export default function CandidateTile({ session, socket, violations, onStart, on
         >
           Start Exam
         </button>
+        {isActive && (proctoringPaused ? (
+          <button className="btn btn-pause" onClick={resumeProctoring}>
+            Resume Proctoring
+          </button>
+        ) : (
+          <button className="btn btn-pause" onClick={pauseProctoring}>
+            Pause Proctoring
+          </button>
+        ))}
         <button
           className="btn btn-stop"
           onClick={onStop}

@@ -16,10 +16,10 @@ export default function Dashboard({ socket, onLogout }) {
         return next
       })
     }
-    const onViolation = ({ sessionId, title, message, at }) => {
+    const onViolation = ({ sessionId, title, message, at, source }) => {
       setViolationsBySession(prev => {
         const cur = prev[sessionId] || []
-        const next = [{ title, message, at }, ...cur].slice(0, 20)
+        const next = [{ title, message, at, source: source || 'desktop' }, ...cur].slice(0, 20)
         return { ...prev, [sessionId]: next }
       })
     }

@@ -210,12 +210,29 @@ io.on('connection', (socket) => {
     socket.emit('sessions:list', listPublicSessions())
   })
 
-  // ── Proctoring events from desktop → forward to admins ───
+  // ── Proctoring events from desktop or mobile → forward to admins ───
   socket.on('proctor:violation', (payload) => {
-    if (socket.data.role !== 'desktop') return
+    if (socket.data.role !== 'desktop' && socket.data.role !== 'mobile') return
     const sid = socket.data.sessionId
     if (!sid) return
-    notifyAdmins('proctor:violation', { sessionId: sid, ...payload })
+    const source = payload?.source || socket.data.role
+    notifyAdmins('proctor:violation', { sessionId: sid, source, ...payload })
+  })
+
+  // Mobile reports which hand the candidate writes with (for admin context)
+  socket.on('mobile:handedness', ({ sessionId: sid, handedness }) => {
+    if (socket.data.role !== 'mobile') return
+    notifyAdmins('mobile:handedness', { sessionId: sid, handedness })
+  })
+
+  // Admin can pause / resume mobile-side proctoring mid-exam
+  socket.on('admin:pause_proctoring', ({ sessionId: sid }) => {
+    if (socket.data.role !== 'admin') return
+    io.to(`session:${sid}`).emit('proctor:pause')
+  })
+  socket.on('admin:resume_proctoring', ({ sessionId: sid }) => {
+    if (socket.data.role !== 'admin') return
+    io.to(`session:${sid}`).emit('proctor:resume')
   })
 
   // ── Stream readiness: emitted when desktop/mobile has its camera

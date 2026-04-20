@@ -71,6 +71,23 @@ export function createProctoringClient() {
     socket.emit('stream:ready', { source: 'desktop' })
   }
 
+  // Apply a bitrate cap to the video sender so we don't saturate the network.
+  // Proctoring doesn't need 2-4 Mbps; 400kbps at 15fps is plenty to see a face.
+  async function capBitrate(pc, kbps = 500) {
+    for (const sender of pc.getSenders()) {
+      if (!sender.track || sender.track.kind !== 'video') continue
+      try {
+        const params = sender.getParameters()
+        params.encodings = params.encodings?.length ? params.encodings : [{}]
+        for (const enc of params.encodings) {
+          enc.maxBitrate = kbps * 1000
+          enc.maxFramerate = 15
+        }
+        await sender.setParameters(params)
+      } catch { /* browser may not allow pre-negotiation */ }
+    }
+  }
+
   async function handleOfferRequest({ sessionId, adminSocketId, source }) {
     if (source !== 'desktop') return
     const pc = new RTCPeerConnection({ iceServers })
@@ -101,6 +118,8 @@ export function createProctoringClient() {
       sessionId, toRole: 'admin', toSocketId: adminSocketId,
       source: 'desktop', kind: 'offer', data: offer,
     })
+    // Cap bitrate right after negotiation so the sender stays efficient
+    capBitrate(pc, 600).catch(() => {})
   }
 
   socket.on('webrtc:request_offer', handleOfferRequest)
