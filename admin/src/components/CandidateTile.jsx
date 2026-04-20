@@ -1,4 +1,18 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { SERVER_URL } from '../lib/adminClient.js'
+
+const DEFAULT_ICE = [{ urls: 'stun:stun.l.google.com:19302' }]
+let iceServersCache = null
+async function loadIceServers() {
+  if (iceServersCache) return iceServersCache
+  try {
+    const res = await fetch(`${SERVER_URL}/api/ice-servers`)
+    const data = await res.json()
+    iceServersCache = Array.isArray(data.iceServers) && data.iceServers.length
+      ? data.iceServers : DEFAULT_ICE
+  } catch { iceServersCache = DEFAULT_ICE }
+  return iceServersCache
+}
 
 /**
  * Each tile subscribes to two WebRTC streams (desktop + mobile) for its session.
@@ -16,13 +30,11 @@ export default function CandidateTile({ session, socket, violations, onStart, on
   useEffect(() => {
     if (session.status === 'ended') return
 
-    const makeConnection = (source) => {
+    const makeConnection = (source, iceServers) => {
       const existing = pcsRef.current[source]
       if (existing) { try { existing.close() } catch {} }
 
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-      })
+      const pc = new RTCPeerConnection({ iceServers })
       pcsRef.current[source] = pc
 
       pc.ontrack = (e) => {
@@ -47,7 +59,8 @@ export default function CandidateTile({ session, socket, violations, onStart, on
       let pc = pcsRef.current[source]
 
       if (msg.kind === 'offer') {
-        pc = makeConnection(source)
+        const iceServers = await loadIceServers()
+        pc = makeConnection(source, iceServers)
         await pc.setRemoteDescription(msg.data)
         const answer = await pc.createAnswer()
         await pc.setLocalDescription(answer)

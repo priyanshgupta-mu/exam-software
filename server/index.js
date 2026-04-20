@@ -78,6 +78,34 @@ app.get('/api/health', (_req, res) => {
   })
 })
 
+// ── ICE server list for WebRTC clients ──────────────────────
+// STUN is free public, TURN is needed for NAT traversal across networks.
+// Configure your own TURN via Render env vars: TURN_URL, TURN_USERNAME, TURN_PASSWORD
+// (e.g. sign up at metered.ca / xirsys / twilio — free tiers available).
+// Without env vars, we fall back to OpenRelay (public, best-effort, may be slow).
+app.get('/api/ice-servers', (_req, res) => {
+  const servers = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+  ]
+  if (process.env.TURN_URL) {
+    servers.push({
+      urls: process.env.TURN_URL,
+      username: process.env.TURN_USERNAME || '',
+      credential: process.env.TURN_PASSWORD || '',
+    })
+  } else {
+    // Public baseline — OpenRelay by Metered.ca. Works for most setups but has
+    // a bandwidth cap and no SLA. Replace with your own in production.
+    servers.push(
+      { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+      { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+      { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+    )
+  }
+  res.json({ iceServers: servers })
+})
+
 // Exchange a pairing token for its session id (used by mobile page bootstrap)
 app.get('/api/pair/:token', (req, res) => {
   const sessionId = consumePairingToken(req.params.token)

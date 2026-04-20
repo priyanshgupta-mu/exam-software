@@ -74,6 +74,13 @@ const socket = io({
 const peerConnections = new Map() // adminSocketId -> RTCPeerConnection
 let sessionId = null
 
+// ── ICE servers (STUN + TURN for cross-network video) ──────
+let iceServers = [{ urls: 'stun:stun.l.google.com:19302' }]
+fetch('/api/ice-servers')
+  .then(r => r.json())
+  .then(d => { if (Array.isArray(d.iceServers) && d.iceServers.length) iceServers = d.iceServers })
+  .catch(() => {})
+
 socket.on('connect', async () => {
   setStatus('pending', 'Pairing…')
   socket.emit('register:mobile', { token }, async (res) => {
@@ -112,9 +119,7 @@ socket.on('webrtc:request_offer', async ({ adminSocketId, source }) => {
   try {
     if (!stream) await openCamera(currentFacing)
 
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    })
+    const pc = new RTCPeerConnection({ iceServers })
     peerConnections.set(adminSocketId, pc)
 
     // Send our video to the admin

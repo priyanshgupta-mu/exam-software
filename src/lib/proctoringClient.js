@@ -23,6 +23,18 @@ async function wakeServer(url) {
   } catch { /* ignore — the socket will still retry */ }
 }
 
+// Default STUN-only config used if /api/ice-servers hasn't returned yet.
+const DEFAULT_ICE = [{ urls: 'stun:stun.l.google.com:19302' }]
+
+async function fetchIceServers(serverUrl) {
+  try {
+    const res = await fetch(`${serverUrl}/api/ice-servers`)
+    const data = await res.json()
+    if (Array.isArray(data.iceServers) && data.iceServers.length) return data.iceServers
+  } catch {}
+  return DEFAULT_ICE
+}
+
 export function createProctoringClient() {
   // Fire-and-forget — don't block client creation, but give the server a head start
   wakeServer(SERVER_URL)
@@ -38,6 +50,9 @@ export function createProctoringClient() {
 
   const peers = new Map() // adminSocketId -> RTCPeerConnection
   let localStream = null
+  let iceServers = DEFAULT_ICE
+  // Load ICE servers once; retry on miss is fine — new PCs will pick up the next result
+  fetchIceServers(SERVER_URL).then(servers => { iceServers = servers })
 
   function attachLocalStream(stream) {
     localStream = stream
@@ -58,9 +73,7 @@ export function createProctoringClient() {
 
   async function handleOfferRequest({ sessionId, adminSocketId, source }) {
     if (source !== 'desktop') return
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    })
+    const pc = new RTCPeerConnection({ iceServers })
     peers.set(adminSocketId, pc)
 
     if (localStream) {
