@@ -11,12 +11,29 @@ const SERVER_URL =
   proctorConfig.serverUrl ||
   'http://localhost:4000'
 
+// Wake the server before opening a socket — on free cloud tiers (Render, etc.)
+// an idle service can take ~30s to cold-start, which exceeds the default
+// socket.io handshake timeout. Hitting /api/health first warms the dyno.
+async function wakeServer(url) {
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 45_000)
+    await fetch(`${url}/api/health`, { signal: controller.signal }).catch(() => {})
+    clearTimeout(timer)
+  } catch { /* ignore — the socket will still retry */ }
+}
+
 export function createProctoringClient() {
+  // Fire-and-forget — don't block client creation, but give the server a head start
+  wakeServer(SERVER_URL)
+
   const socket = io(SERVER_URL, {
     query: { role: 'desktop' },
-    transports: ['websocket'],
+    transports: ['websocket', 'polling'],  // fallback for restrictive networks
     reconnection: true,
-    reconnectionDelay: 1000,
+    reconnectionDelay: 2000,
+    reconnectionDelayMax: 10_000,
+    timeout: 45_000,  // tolerate Render cold starts
   })
 
   const peers = new Map() // adminSocketId -> RTCPeerConnection

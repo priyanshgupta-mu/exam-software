@@ -64,7 +64,13 @@ flipBtn.addEventListener('click', async () => {
 })
 
 // ── Socket + signaling ──────────────────────────────────────
-const socket = io({ query: { role: 'mobile' } })
+const socket = io({
+  query: { role: 'mobile' },
+  transports: ['websocket', 'polling'],
+  timeout: 45_000,
+  reconnection: true,
+  reconnectionDelay: 2000,
+})
 const peerConnections = new Map() // adminSocketId -> RTCPeerConnection
 let sessionId = null
 

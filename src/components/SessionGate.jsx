@@ -49,9 +49,13 @@ export default function SessionGate({ user, onStart }) {
     }
 
     client.socket.on('connect', onConnect)
-    client.socket.on('connect_error', () => {
+    client.socket.on('connect_error', (err) => {
       setStatus('error')
-      setErrorMsg('Cannot reach proctoring server. Is it running on port 4000?')
+      setErrorMsg(
+        `Cannot reach proctoring server at ${client.serverUrl}. ` +
+        `If this is a cloud deploy on a free plan, it may be cold-starting (wait ~30s and reload). ` +
+        `Details: ${err?.message || 'connect_error'}`
+      )
     })
     client.socket.on('mobile:paired', () => setMobilePaired(true))
     client.socket.on('mobile:disconnected', () => setMobilePaired(false))

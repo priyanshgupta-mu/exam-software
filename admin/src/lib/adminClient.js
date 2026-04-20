@@ -20,7 +20,13 @@ export async function adminLoginHttp(username, password) {
 }
 
 export function connectAdminSocket(token) {
-  const socket = io(SERVER_URL, { query: { role: 'admin' }, transports: ['websocket'] })
+  const socket = io(SERVER_URL, {
+    query: { role: 'admin' },
+    transports: ['websocket', 'polling'],
+    timeout: 45_000,
+    reconnection: true,
+    reconnectionDelay: 2000,
+  })
   return new Promise((resolve, reject) => {
     let resolved = false
     socket.on('connect', () => {
