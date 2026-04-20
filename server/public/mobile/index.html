@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>ProctorExam — Mobile Camera</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="brand">ProctorExam</div>
+      <div id="status" class="status status-pending">Connecting…</div>
+    </header>
+
+    <video id="preview" autoplay muted playsinline></video>
+
+    <div id="overlay" class="overlay">
+      <div id="panel" class="panel">
+        <div id="panel-title">Preparing camera…</div>
+        <div id="panel-sub"></div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="row">
+        <button id="flip">Flip Camera</button>
+        <div id="session" class="muted"></div>
+      </div>
+      <div class="fine">Keep this page open for the entire exam. Do not lock the phone.</div>
+    </footer>
+  </div>
+
+  <script src="./mobile.js"></script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+.overlay {
+  position: fixed; inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+
+/* ── Header ─────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 28px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.3rem;
+  color: #1e3a5f;
+  margin: 0 0 2px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Body ───────────────────────────────────── */
+.body {
+  padding: 20px 28px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Check Section ──────────────────────────── */
+.checkSection {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fafbfc;
+}
+
+.checkHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.statusIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.checkTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 2px;
+}
+
+.checkDesc {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Camera Preview ─────────────────────────── */
+.preview {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #111827;
+  aspect-ratio: 16 / 9;
+  max-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.noCamera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+/* ── Audio Meter ────────────────────────────── */
+.meterContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.meterTrack {
+  flex: 1;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 5px;
+  transition: width 0.08s ease-out;
+  min-width: 2px;
+}
+
+.meterGreen {
+  background: #22c55e;
+}
+
+.meterLabel {
+  font-size: 0.75rem;
+  color: #6b7280;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* ── Speaker Test ───────────────────────────── */
+.testBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s;
+}
+
+.testBtn:hover {
+  background: #163050;
+}
+
+.passedNote {
+  font-size: 0.8rem;
+  color: #16a34a;
+  font-weight: 500;
+}
+
+/* ── Keyboard Test ──────────────────────────── */
+.keyboardTest {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  background: #1e3a5f;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+}
+
+.keyPrompt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.keyCount {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* ── Footer ─────────────────────────────────── */
+.footer {
+  padding: 18px 28px 22px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.statusSummary {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.startBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 32px;
+  background: #94a3b8;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: not-allowed;
+  font-family: inherit;
+  transition: all 0.25s;
+  width: 100%;
+  justify-content: center;
+}
+
+.startBtnReady {
+  background: #16a34a;
+  cursor: pointer;
+  animation: pulseGreen 2s infinite;
+}
+
+.startBtnReady:hover {
+  background: #15803d;
+}
+
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: 4px 8px;
+}
+
+.backBtn:hover {
+  color: #374151;
+}

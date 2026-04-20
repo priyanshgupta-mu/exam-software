@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: examapp-proctor
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: "npm --prefix server install --omit=dev && npm --prefix admin install && npm --prefix admin run build"
+    startCommand: "node server/index.js"
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASS
+        # sync: false prompts you to set a value in the Render UI
+        sync: false

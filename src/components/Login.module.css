@@ -1,0 +1,129 @@
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  padding: 24px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+  text-align: center;
+}
+
+.logo { margin-bottom: 12px; }
+
+.title {
+  font-size: 1.6rem;
+  color: #1e3a5f;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
+.form { display: flex; flex-direction: column; gap: 16px; }
+
+.group { text-align: left; }
+
+.group label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.group input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #111827;
+  outline: none;
+  background: #f9fafb;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.group input:focus { border-color: #1e3a5f; background: #fff; }
+
+.pwdWrapper { position: relative; }
+.pwdWrapper input { padding-right: 42px; }
+
+.eyeBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+.eyeBtn:hover { color: #374151; }
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.8rem;
+  color: #92400e;
+}
+.notice svg { flex-shrink: 0; margin-top: 1px; }
+
+.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.btnLogin {
+  width: 100%;
+  padding: 13px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+.btnLogin:hover  { background: #163050; }
+.btnLogin:active { transform: scale(0.98); }
+
+.demoHint {
+  margin-top: 18px;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+.demoHint strong { color: #6b7280; }

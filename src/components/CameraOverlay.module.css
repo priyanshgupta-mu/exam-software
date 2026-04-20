@@ -1,0 +1,159 @@
+.overlay {
+  position: fixed; inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+}
+
+/* ── Error cards (denied / busy) ──────────────────────────── */
+.errorCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 36px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.errorCard h2 { font-size: 1.35rem; margin: 0; }
+.errorCard p  { color: #4b5563; font-size: 0.9rem; line-height: 1.5; margin: 0; }
+
+.steps {
+  text-align: left;
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.9;
+  padding-left: 20px;
+  width: 100%;
+}
+
+/* ── Disclaimer page ──────────────────────────────────────── */
+.disclaimer {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+
+.disclaimerHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.disclaimerTitle {
+  font-size: 1.35rem;
+  color: #1e3a5f;
+  margin: 0 0 2px;
+  font-weight: 700;
+}
+.disclaimerSub {
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.disclaimerBody {
+  padding: 22px 28px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cameraBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: #1e40af;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+.cameraBanner svg { flex-shrink: 0; margin-top: 1px; }
+
+.rulesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+}
+
+.consentText {
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.55;
+  margin: 0;
+  padding-top: 4px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* ── Footer ───────────────────────────────────────────────── */
+.disclaimerFooter {
+  padding: 18px 28px 22px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnStart {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 32px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.18s;
+}
+.btnStart:hover { background: #163050; }
+
+.footerNote {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0;
+  text-align: center;
+}
+
+/* shared allow button (error cards) */
+.btnAllow {
+  padding: 11px 26px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+.btnAllow:hover { background: #163050; }

@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+dist-ssr/
+build-output/
+admin/dist/
+.vite/
+
+# Electron build artifacts
+release/
+*.dmg
+*.AppImage
+*.exe
+*.deb
+*.rpm
+*.pkg
+*.zip
+*.app/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.local
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+Thumbs.db
+
+# Deploy
+.vercel
+.netlify
+
+# Misc
+coverage/
+.cache/
+tmp/

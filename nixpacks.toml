@@ -1,0 +1,18 @@
+# Nixpacks build plan for Railway.
+# Keeps the build lean: we only need server/ and admin/ deps on the deployed server.
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = [
+  "npm --prefix server install --omit=dev",
+  "npm --prefix admin install"
+]
+
+[phases.build]
+cmds = [
+  "npm --prefix admin run build"
+]
+
+[start]
+cmd = "node server/index.js"

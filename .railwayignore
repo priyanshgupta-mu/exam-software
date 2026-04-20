@@ -1,0 +1,19 @@
+# Files the Railway-deployed server doesn't need.
+# Keeps the build context small and avoids installing Electron on the server.
+
+dist/
+build/
+release/
+
+electron/
+src/
+public/
+
+start.cjs
+test-electron.cjs
+deploy.bat
+
+# Dev-only
+.vite/
+*.log
+.DS_Store
